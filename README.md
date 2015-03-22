@@ -22,6 +22,7 @@ The OSS implementations have minimal, if any, tests. The only searchable _test c
 above worked example and some comments in the opensky documentation. 
 
 The current implementation has a number of known limitations:
+
 1. Ignores gilham encoding on altitude
 2. No logic to perform CompactRepresentation processing on surface positions
 3. Messsages are incomplete
