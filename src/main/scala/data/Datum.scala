@@ -1,5 +1,7 @@
 package data
 
+import scodec.bits.ByteVector
+
 //http://adsb.tc.faa.gov/WG3_Meetings/Meeting30/1090-WP30-21-Appendix_A%20Mods.pdf
 
 object Datum {
@@ -95,7 +97,7 @@ object Datum {
   case class NicB(value: Int) extends AnyVal
   case class TypeCode(value: Int) extends AnyVal
   case class SubTypeCode(value: Int) extends AnyVal
-  case class Timestamp(value:Long) extends AnyVal
+  case class Timestamp(value: Long) extends AnyVal
 
   sealed trait EmitterCategory {
     def tc: Int
@@ -213,17 +215,19 @@ object Datum {
       filter(e => e.tc == tc && e.category == category).headOption.getOrElse(ReservedEmitterCategory(tc, category))
   }
 
-  sealed trait Message
-  case class AirbornePositionMessage(ts:Timestamp, id: AircraftAddress, ss: SurveillanceStatus, altitude: Altitude,
+  sealed trait Message {
+    def ts: Timestamp
+  }
+  case class AirbornePositionMessage(ts: Timestamp, id: AircraftAddress, ss: SurveillanceStatus, altitude: Altitude,
                                      sync: TimeSynchronization, cpr: CompactPositionRepresentation,
                                      containment: HorizontalContainmentRadius) extends Message
-  case class SurfacePositionMessage(ts:Timestamp, id: AircraftAddress, sync: TimeSynchronization,
+  case class SurfacePositionMessage(ts: Timestamp, id: AircraftAddress, sync: TimeSynchronization,
                                     cpr: CompactPositionRepresentation, containment: HorizontalContainmentRadius) extends Message
-  case class AirborneOperationalStatusMessage(ts:Timestamp, id: AircraftAddress, nicA: NicA) extends Message
-  case class SurfaceOperationalStatusMessage(ts:Timestamp, id: AircraftAddress, nicA: NicA) extends Message
-  case class IdentificationMessage(ts:Timestamp, id: AircraftAddress, category: EmitterCategory, callsign: String) extends Message
- 
-  case object Unknown17 extends Message
+  case class AirborneOperationalStatusMessage(ts: Timestamp, id: AircraftAddress, nicA: NicA) extends Message
+  case class SurfaceOperationalStatusMessage(ts: Timestamp, id: AircraftAddress, nicA: NicA) extends Message
+  case class IdentificationMessage(ts: Timestamp, id: AircraftAddress, category: EmitterCategory, callsign: String) extends Message
+
+  case class Unknown17(ts: Timestamp, bytes: ByteVector) extends Message
 
   sealed trait CompactPositionRepresentation {
     def lat: Int

@@ -189,9 +189,9 @@ class Codecs(tsSource: () => Timestamp) {
     },
     v => v.id ~ (v.category.tc ~ (v.category.category ~ v.callsign)))
 
-  val nullParser: Codec[Message] = ignore(112).xmap(
-    p => Unknown17,
-    v => ())
+  val nullParser: Codec[Unknown17] = bits(112).xmap(
+    p => Unknown17(tsSource(), p.bytes),
+    _.bytes.bits)
 
   val msg = choice(adsbDF ~> capabilities ~> choice(barometricAirbornePosition.upcast[Message],
     gnssAirbornePosition.upcast[Message],
@@ -199,6 +199,6 @@ class Codecs(tsSource: () => Timestamp) {
     airborneOperationalStatus.upcast[Message],
     surfaceOperationalStatus.upcast[Message],
     identification.upcast[Message]) <~ parity,
-    nullParser)
+    nullParser.upcast[Message])
 
 }
