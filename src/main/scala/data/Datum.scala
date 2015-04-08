@@ -101,7 +101,7 @@ object Datum {
   case class Timestamp(value: Long) extends AnyVal {
     def olderThan(duration: Duration): Boolean = System.currentTimeMillis - value > duration.toMillis
     def moreRecentThan(o: Timestamp): Boolean = value > o.value
-    def noOlderThan(newer:Timestamp,duration:Duration) = newer.value - value < duration.toMillis
+    def noOlderThan(newer: Timestamp, duration: Duration) = newer.value - value < duration.toMillis
   }
 
   sealed trait EmitterCategory {
@@ -223,14 +223,17 @@ object Datum {
   sealed trait Message {
     def ts: Timestamp
   }
+  sealed trait Identified {
+    def id: AircraftAddress
+  }
   case class AirbornePositionMessage(ts: Timestamp, id: AircraftAddress, ss: SurveillanceStatus, altitude: Altitude,
                                      sync: TimeSynchronization, cpr: CompactPositionRepresentation,
-                                     containment: HorizontalContainmentRadius) extends Message
+                                     containment: HorizontalContainmentRadius) extends Message with Identified
   case class SurfacePositionMessage(ts: Timestamp, id: AircraftAddress, sync: TimeSynchronization,
                                     cpr: CompactPositionRepresentation, containment: HorizontalContainmentRadius) extends Message
-  case class AirborneOperationalStatusMessage(ts: Timestamp, id: AircraftAddress, nicA: NicA) extends Message
-  case class SurfaceOperationalStatusMessage(ts: Timestamp, id: AircraftAddress, nicA: NicA) extends Message
-  case class IdentificationMessage(ts: Timestamp, id: AircraftAddress, category: EmitterCategory, callsign: String) extends Message
+  case class AirborneOperationalStatusMessage(ts: Timestamp, id: AircraftAddress, nicA: NicA) extends Message with Identified
+  case class SurfaceOperationalStatusMessage(ts: Timestamp, id: AircraftAddress, nicA: NicA) extends Message with Identified
+  case class IdentificationMessage(ts: Timestamp, id: AircraftAddress, category: EmitterCategory, callsign: String) extends Message with Identified
 
   case class Unknown17(ts: Timestamp, bytes: ByteVector) extends Message
 
