@@ -1,6 +1,7 @@
 package data
 
 import scodec.bits.ByteVector
+import scala.concurrent.duration.Duration
 
 //http://adsb.tc.faa.gov/WG3_Meetings/Meeting30/1090-WP30-21-Appendix_A%20Mods.pdf
 
@@ -97,7 +98,11 @@ object Datum {
   case class NicB(value: Int) extends AnyVal
   case class TypeCode(value: Int) extends AnyVal
   case class SubTypeCode(value: Int) extends AnyVal
-  case class Timestamp(value: Long) extends AnyVal
+  case class Timestamp(value: Long) extends AnyVal {
+    def olderThan(duration: Duration): Boolean = System.currentTimeMillis - value > duration.toMillis
+    def moreRecentThan(o: Timestamp): Boolean = value > o.value
+    def noOlderThan(newer:Timestamp,duration:Duration) = newer.value - value < duration.toMillis
+  }
 
   sealed trait EmitterCategory {
     def tc: Int
@@ -240,4 +245,5 @@ object Datum {
   case class OddCompactPositionRepresentation(lat: Int, lon: Int) extends CompactPositionRepresentation {
     val odd = true
   }
+
 }
