@@ -82,7 +82,7 @@ class CodecsTest {
 
   @Test
   def npiRound {
-    round(Unknown17(Timestamp(0), ByteVector(Array[Byte](1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14))))
+    round(Unknown(Timestamp(0), ByteVector(Array[Byte](1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14))))
   }
 
   @Test //TODO
@@ -139,13 +139,13 @@ class CodecsTest {
   def ignoreTest {
     val ignore = hex"8D000000000000CF7E9BA6F701D0"
 
-    assertEquals(Unknown17(Timestamp(0), ignore), decoder(ignore))
+    assertEquals(Unknown(Timestamp(0), ignore), decoder(ignore))
   }
 
   @Test
   def examples {
     val input = hex"8d48cb1599117d19a00499000000"
-    assertEquals(Unknown17(Timestamp(0), input), decoder(input))
+    assertEquals(Unknown(Timestamp(0), input), decoder(input))
   }
 
   import scodec.Codec

@@ -29,7 +29,7 @@ object CurrentAirborneStateApp extends App {
     .groupBy { _.id }
     .mapValues(s => process(s).reverse)
 
-  v.mapValues(_.mkString("\n")).foreach { l => println(l); println("---------------") }
+  v.mapValues(_.mkString("\n")).foreach { println }
 
   @tailrec def process(values: Seq[Message],
                        state: Option[CurrentAirborneState] = None,

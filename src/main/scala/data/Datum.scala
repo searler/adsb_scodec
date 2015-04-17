@@ -235,7 +235,7 @@ object Datum {
   case class SurfaceOperationalStatusMessage(ts: Timestamp, id: AircraftAddress, nicA: NicA) extends Message with Identified
   case class IdentificationMessage(ts: Timestamp, id: AircraftAddress, category: EmitterCategory, callsign: String) extends Message with Identified
 
-  case class Unknown17(ts: Timestamp, bytes: ByteVector) extends Message
+  case class Unknown(ts: Timestamp, bytes: ByteVector) extends Message
 
   sealed trait CompactPositionRepresentation {
     def lat: Int
