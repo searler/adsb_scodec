@@ -7,8 +7,38 @@ case class Position(lat: Double, lon: Double)
 /**
  *
  * Decoding, local and global position is ported from https://github.com/openskynetwork/java-adsb/blob/master/src/main/java/org/opensky/libadsb/msgs/AirbornePositionMsg.java
+ * org.opensky.libadsb is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation, either version 3 of the License, or
+ *  (at your option) any later version.
+ *
+ *  org.opensky.libadsb is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *  
+ *  You should have received a copy of the GNU General Public License
+ *  along with org.opensky.libadsb.  If not, see <http://www.gnu.org/licenses/>.
  *
  * Encoding is ported from https://github.com/bistromath/gr-air-modes/blob/master/python/cpr.py
+ * # Copyright 2010, 2012 Nick Foster
+ * #
+ * # This file is part of gr-air-modes
+ * #
+ * # gr-air-modes is free software; you can redistribute it and/or modify
+ * # it under the terms of the GNU General Public License as published by
+ * # the Free Software Foundation; either version 3, or (at your option)
+ * # any later version.
+ * #
+ * # gr-air-modes is distributed in the hope that it will be useful,
+ * # but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * # GNU General Public License for more details.
+ * #
+ * # You should have received a copy of the GNU General Public License
+ * # along with gr-air-modes; see the file COPYING.  If not, write to
+ * # the Free Software Foundation, Inc., 51 Franklin Street,
+ * # Boston, MA 02110-1301, USA.
  */
 object AirborneCPR {
   val Dlat0 = 360.0 / 60.0;
@@ -25,7 +55,7 @@ object AirborneCPR {
     val tmp = 1 - (1 - Math.cos(Math.PI / (2.0 * 15.0))) / Math.pow(Math.cos(Math.PI / 180.0 * Math.abs(Rlat)), 2);
     Math.floor(2 * Math.PI / Math.acos(tmp))
   }
-  
+
   def global(m1: CompactPositionRepresentation, m2: CompactPositionRepresentation): Option[Position] = {
     if (m1.odd == m2.odd)
       None

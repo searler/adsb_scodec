@@ -12,10 +12,13 @@ object CurrentAirborneStateApp extends App {
 
   val codecs = new Codecs({
     var count = 0
-    () => { count += 1; Timestamp(count) }
+    () => {
+      count += 1
+      Timestamp(count)
+    }
   })
 
-  val pv = CurrentAirborneState.processValues(Duration(1, SECONDS), Duration(15, SECONDS))_
+  val pv = CurrentAirborneState.processValues(Duration(1, SECONDS), Duration(15, SECONDS)) _
 
   val v = Source.fromInputStream(classOf[App].getResourceAsStream("/messages.txt"))
     .getLines()
@@ -28,11 +31,14 @@ object CurrentAirborneStateApp extends App {
 
   v.mapValues(_.mkString("\n")).foreach { l => println(l); println("---------------") }
 
-  @tailrec def process(values: Seq[Message], state: Option[CurrentAirborneState] = None, accum: List[Option[CurrentAirborneState]] = Nil): List[Option[CurrentAirborneState]] = values match {
-    case Seq() => accum
-    case _ =>
-      val newState = pv(Seq(values.head), state)
-      process(values.tail, newState, newState :: accum)
-  }
+  @tailrec def process(values: Seq[Message],
+                       state: Option[CurrentAirborneState] = None,
+                       accum: List[Option[CurrentAirborneState]] = Nil): List[Option[CurrentAirborneState]] =
+    values match {
+      case Seq() => accum
+      case _ =>
+        val newState = pv(Seq(values.head), state)
+        process(values.tail, newState, newState :: accum)
+    }
 
 }
