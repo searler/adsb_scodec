@@ -223,7 +223,7 @@ object Datum {
   sealed trait Message {
     def ts: Timestamp
   }
-  sealed trait Identified {
+  sealed trait Identified extends Message{
     def id: AircraftAddress
   }
   case class AirbornePositionMessage(ts: Timestamp, id: AircraftAddress, ss: SurveillanceStatus, altitude: Altitude,
