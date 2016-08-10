@@ -18,3 +18,8 @@ project/plugins/project/
 .classpath
 .project
 bin/
+
+# idea
+.idea
+
+classes
