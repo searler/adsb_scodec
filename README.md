@@ -9,6 +9,10 @@ Processing ADS-B messages using scodec
 
 [Worked Example](http://www.lll.lu/~edward/edward/adsb/DecodingADSBposition.html)
 
+[Useful documentation](http://adsb-decode-guide.readthedocs.io/en/latest/identification.html)
+
+[Implementation with test data](https://github.com/junzis/pyModeS)
+
 ## Caveats
 
 The official specifications cost hundreds of dollars.
