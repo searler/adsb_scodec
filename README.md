@@ -52,14 +52,6 @@ Tests are included.
 
 ## Implementation notes
 
-### Scala
-
-The code is cross coupled for 2.10 and 2.11.
-
-Scala 2.11 has better Eclipse IDE and scodec support.
-
-Apache Spark currently only supports Scala 2.10. 
-This project originated as a basis for an Spark exploration.
 
 ### Scodec
 
