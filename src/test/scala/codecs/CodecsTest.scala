@@ -109,6 +109,14 @@ class CodecsTest {
   }
 
   /**
+    * http://adsb-decode-guide.readthedocs.io/en/latest/identification.html
+    */
+  @Test
+  def identificationExample{
+    assertEquals(IdentificationMessage(Timestamp(0),AircraftAddress(0x4840D6),NoEmitterCategoryA,"KLM1023"),decoder(hex"8D4840D6202CC371C32CE0576098"))
+  }
+
+  /**
    * http://www.lll.lu/~edward/edward/adsb/DecodingADSBposition.html
    *
    * one, two
