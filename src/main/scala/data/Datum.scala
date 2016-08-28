@@ -230,7 +230,7 @@ object Datum {
                                      sync: TimeSynchronization, cpr: CompactPositionRepresentation,
                                      containment: HorizontalContainmentRadius) extends Message with Identified
   case class SurfacePositionMessage(ts: Timestamp, id: AircraftAddress, sync: TimeSynchronization,
-                                    cpr: CompactPositionRepresentation, containment: HorizontalContainmentRadius) extends Message
+                                    cpr: CompactPositionRepresentation, containment: HorizontalContainmentRadius) extends Message with Identified
   case class AirborneOperationalStatusMessage(ts: Timestamp, id: AircraftAddress, nicA: NicA) extends Message with Identified
   case class SurfaceOperationalStatusMessage(ts: Timestamp, id: AircraftAddress, nicA: NicA) extends Message with Identified
   case class IdentificationMessage(ts: Timestamp, id: AircraftAddress, category: EmitterCategory, callsign: String) extends Message with Identified
