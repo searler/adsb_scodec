@@ -19,6 +19,14 @@ class CodecsTest {
   val round = CodecTest.round(codecs.msg)_
 
   @Test
+  def groundSpeed(): Unit ={
+    assertEquals(SubsonicGroundVelocityMessage(Timestamp(0),AircraftAddress("485020"),false,VelocityNAC0,
+      182.8803775528476,159.20113064925135,
+      BarometricVerticalRate(-14), 23),
+      decoder(hex"8D485020994409940838175B284F"))
+  }
+
+  @Test
   def callsign {
     assertEquals("c01c42820820", CodecTest.encode(codecs.call)("0A1B"))
     CodecTest.round(codecs.call)("0A")
@@ -153,7 +161,7 @@ class CodecsTest {
   @Test
   def examples {
     val input = hex"8d48cb1599117d19a00499000000"
-    assertEquals(Unknown(Timestamp(0), input), decoder(input))
+    assertEquals(SubsonicGroundVelocityMessage(Timestamp(0),AircraftAddress("48CB15"),false,VelocityNAC2,61.771223818630425,431.2957222138889,BarometricVerticalRate(1),-103), decoder(input))
   }
 
   import scodec.Codec

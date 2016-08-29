@@ -172,6 +172,41 @@ class Codecs(tsSource: () => Timestamp) {
     },
     v => v.id ~ (31 ~ v.nicA))
 
+  val nacv :Codec[VelocityNAC] = mappedEnum(uint3,
+    VelocityNAC0 -> 0 , VelocityNAC1 -> 1, VelocityNAC2 -> 2, VelocityNAC3 ->3, VelocityNAC4 ->4)
+  val verticalRate:Codec[VerticalRate] = (bool(1) ~ bool(1) ~int(9)).xmap (
+     _ match {
+       case (true ~ d) ~ r => GeometricVerticalRate(if(d) -r else r)
+       case (false ~ d) ~r =>    BarometricVerticalRate(if(d) -r else r)
+
+     },
+    _ match {
+      case GeometricVerticalRate(r) => (true  ~ (r< 0) )~ r
+      case BarometricVerticalRate(r) => (false  ~ (r< 0))~ r
+    }
+  )
+
+  val gvel:Codec[Int] = (bool(1) ~ uint(10)).xmap (
+    _ match {
+      case true ~ v => -1 * (v-1)
+      case false ~ v => v -1
+    },
+    v  => if(v > 0) false ~( v + 1) else true ~ ((-v) + 1)
+  )
+  val x = (addr ~ ((c5(19) ~> c3(1)) ~> bool(1) ~ (ignore(1) ~> nacv) ~ gvel ~ gvel ~ verticalRate ~ (ignore(2) ~> int(8)) ))
+  val subsonicGroundSpeed : Codec[SubsonicGroundVelocityMessage] = x.xmap (
+    p => {
+      val  (addr ~ (((((icf ~ nac) ~ x) ~ y) ~ vr) ~bd)) = p
+
+      val h = math.atan2(x,y)* (360.0/ (2.0*math.Pi))
+      SubsonicGroundVelocityMessage(tsSource(),addr,icf,nac,
+        if(h<0) h + 360 else h,
+        math.sqrt(x*x + y*y),
+        vr, bd )
+    },
+    v => null
+  )
+
   def call: Codec[String] = {
     val ais_charset = "?ABCDEFGHIJKLMNOPQRSTUVWXYZ????? ???????????????0123456789??????".toVector
 
@@ -195,6 +230,7 @@ class Codecs(tsSource: () => Timestamp) {
 
   val msg = choice(adsbDF ~> capabilities ~> choice(barometricAirbornePosition.upcast[Message],
     gnssAirbornePosition.upcast[Message],
+    subsonicGroundSpeed.upcast[Message],
     surfacePosition.upcast[Message],
     airborneOperationalStatus.upcast[Message],
     surfaceOperationalStatus.upcast[Message],

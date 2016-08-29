@@ -220,6 +220,47 @@ object Datum {
       filter(e => e.tc == tc && e.category == category).headOption.getOrElse(ReservedEmitterCategory(tc, category))
   }
 
+  sealed trait VelocityNAC{
+    def hfomr :Option[Double]
+    def vfomr :Option[Double]
+  }
+  case object VelocityNAC0 extends VelocityNAC{
+    val hfomr = None
+    val vfomr = None
+  }
+  case object VelocityNAC1 extends VelocityNAC
+  {
+    val hfomr = Some(10.0)
+    val vfomr = Some(50.0)
+  }
+  case object VelocityNAC2 extends VelocityNAC
+  {
+    val hfomr = Some(3.0)
+    val vfomr = Some(15.0)
+  }
+  case object VelocityNAC3 extends VelocityNAC
+  {
+    val hfomr = Some(1.0)
+    val vfomr = Some(5.0)
+  }
+  case object VelocityNAC4 extends VelocityNAC
+  {
+    val hfomr = Some(0.3)
+    val vfomr = Some(1.5)
+  }
+
+  sealed trait AirSpeed {
+    def knots:Double
+  }
+  case class IndicatedAirSpeed(knots:Double) extends AirSpeed
+  case class TrueAirSpeed(knots:Double) extends AirSpeed
+
+  sealed trait VerticalRate{
+    def rate:Int
+  }
+  case class BarometricVerticalRate(rate:Int) extends VerticalRate
+  case class GeometricVerticalRate(rate:Int) extends VerticalRate
+
   sealed trait Message {
     def ts: Timestamp
   }
@@ -234,6 +275,11 @@ object Datum {
   case class AirborneOperationalStatusMessage(ts: Timestamp, id: AircraftAddress, nicA: NicA) extends Message with Identified
   case class SurfaceOperationalStatusMessage(ts: Timestamp, id: AircraftAddress, nicA: NicA) extends Message with Identified
   case class IdentificationMessage(ts: Timestamp, id: AircraftAddress, category: EmitterCategory, callsign: String) extends Message with Identified
+
+  case class SubsonicGroundVelocityMessage(ts : Timestamp, id: AircraftAddress, intentChange:Boolean, nac: VelocityNAC,
+                                           heading : Double, groundSpeed : Double, verticalRate:VerticalRate, deltaFromBaro: Int ) extends Message with Identified
+  case class SubsonicAirSpeedMessage(ts : Timestamp, id: AircraftAddress, intentChange:Boolean, nac: VelocityNAC,
+                                     heading :Option[Double], airspeed : AirSpeed, verticalRate:VerticalRate, deltaFromBaro: Int ) extends Message with Identified
 
   case class Unknown(ts: Timestamp, bytes: ByteVector) extends Message
 
