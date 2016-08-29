@@ -14,16 +14,19 @@ class CodecsTest {
 
   def zeroTS = () => Timestamp(0)
 
-  val decoder = CodecTest.decode(codecs.msg)_
-  val encoder = CodecTest.encode(codecs.msg)_
-  val round = CodecTest.round(codecs.msg)_
+  val decoder = CodecTest.decode(codecs.msg) _
+  val encoder = CodecTest.encode(codecs.msg) _
+  val round = CodecTest.round(codecs.msg) _
 
   @Test
-  def groundSpeed(): Unit ={
-    assertEquals(SubsonicGroundVelocityMessage(Timestamp(0),AircraftAddress("485020"),false,VelocityNAC0,
-      182.8803775528476,159.20113064925135,
-      BarometricVerticalRate(-14), 23),
+  def groundSpeed(): Unit = {
+    val msg = SubsonicGroundVelocityMessage(Timestamp(0), AircraftAddress("485020"), false, VelocityNAC0,
+      182.8803775528476, 159.20113064925135,
+      BarometricVerticalRate(-14), 23)
+    assertEquals(msg,
       decoder(hex"8D485020994409940838175B284F"))
+
+    round(msg)
   }
 
   @Test
@@ -57,13 +60,13 @@ class CodecsTest {
   }
 
   /**
-   * Horizontal containment radius is 185.2 m
-   * Altitude is 10972.800000000001 m  (36000 ft)
-   * [c0ffee]: Now at position (47.00724792480469,8.025993347167969) (global)
-   * Horizontal containment radius is 185.2 m
-   * Altitude is 10972.800000000001 m  val two = hex"8D75804B580FF6B283EB7A157117"
-   *
-   */
+    * Horizontal containment radius is 185.2 m
+    * Altitude is 10972.800000000001 m  (36000 ft)
+    * [c0ffee]: Now at position (47.00724792480469,8.025993347167969) (global)
+    * Horizontal containment radius is 185.2 m
+    * Altitude is 10972.800000000001 m  val two = hex"8D75804B580FF6B283EB7A157117"
+    *
+    */
   @Test
   def matcherJavaTest {
     val odd = hex"8dc0ffee58b986d0b3bd25000000"
@@ -120,20 +123,20 @@ class CodecsTest {
     * http://adsb-decode-guide.readthedocs.io/en/latest/identification.html
     */
   @Test
-  def identificationExample{
-    assertEquals(IdentificationMessage(Timestamp(0),AircraftAddress(0x4840D6),NoEmitterCategoryA,"KLM1023"),decoder(hex"8D4840D6202CC371C32CE0576098"))
+  def identificationExample {
+    assertEquals(IdentificationMessage(Timestamp(0), AircraftAddress(0x4840D6), NoEmitterCategoryA, "KLM1023"), decoder(hex"8D4840D6202CC371C32CE0576098"))
   }
 
   /**
-   * http://www.lll.lu/~edward/edward/adsb/DecodingADSBposition.html
-   *
-   * one, two
-   * Lon =  123.889128586342
-   * Lat =  10.2162144547802
-   *
-   *
-   * 2nd : Altitude is 2175
-   */
+    * http://www.lll.lu/~edward/edward/adsb/DecodingADSBposition.html
+    *
+    * one, two
+    * Lon =  123.889128586342
+    * Lat =  10.2162144547802
+    *
+    *
+    * 2nd : Altitude is 2175
+    */
   @Test
   def matcherEdwardTest {
     val one = hex"8D75804B580FF2CF7E9BA6F701D0"
@@ -160,15 +163,21 @@ class CodecsTest {
 
   @Test
   def examples {
+    val data = SubsonicGroundVelocityMessage(Timestamp(0), AircraftAddress("48CB15"), false, VelocityNAC2, 61.771223818630425, 431.2957222138889, BarometricVerticalRate(1), -103)
     val input = hex"8d48cb1599117d19a00499000000"
-    assertEquals(SubsonicGroundVelocityMessage(Timestamp(0),AircraftAddress("48CB15"),false,VelocityNAC2,61.771223818630425,431.2957222138889,BarometricVerticalRate(1),-103), decoder(input))
+    assertEquals(data, decoder(input))
+
+    round(data)
   }
 
   import scodec.Codec
   import org.junit.Assert.assertEquals
 
   object CodecTest {
-    def encode[T](e: Codec[T])(v: T) = scodec.Encoder.encode(v)(e).map { _.toHex }.require
+    def encode[T](e: Codec[T])(v: T) = scodec.Encoder.encode(v)(e).map {
+      _.toHex
+    }.require
+
     def decode[T](e: Codec[T])(bv: ByteVector) = scodec.Decoder.decode(bv.bits)(e).require.value
 
     def round[T](e: Codec[T])(src: T) = {

@@ -181,8 +181,8 @@ class Codecs(tsSource: () => Timestamp) {
 
      },
     _ match {
-      case GeometricVerticalRate(r) => (true  ~ (r< 0) )~ r
-      case BarometricVerticalRate(r) => (false  ~ (r< 0))~ r
+      case GeometricVerticalRate(r) => (true  ~ (r < 0) )~ math.abs(r)
+      case BarometricVerticalRate(r) => (false  ~ (r < 0))~ math.abs(r)
     }
   )
 
@@ -193,8 +193,8 @@ class Codecs(tsSource: () => Timestamp) {
     },
     v  => if(v > 0) false ~( v + 1) else true ~ ((-v) + 1)
   )
-  val x = (addr ~ ((c5(19) ~> c3(1)) ~> bool(1) ~ (ignore(1) ~> nacv) ~ gvel ~ gvel ~ verticalRate ~ (ignore(2) ~> int(8)) ))
-  val subsonicGroundSpeed : Codec[SubsonicGroundVelocityMessage] = x.xmap (
+
+  val subsonicGroundSpeed : Codec[SubsonicGroundVelocityMessage] = (addr ~ ((c5(19) ~> c3(1)) ~> bool(1) ~ (ignore(1) ~> nacv) ~ gvel ~ gvel ~ verticalRate ~ (ignore(2) ~> int(8)) )).xmap (
     p => {
       val  (addr ~ (((((icf ~ nac) ~ x) ~ y) ~ vr) ~bd)) = p
 
@@ -204,7 +204,11 @@ class Codecs(tsSource: () => Timestamp) {
         math.sqrt(x*x + y*y),
         vr, bd )
     },
-    v => null
+    v =>  {
+      val x:Int = math.round(math.sin(v.heading / (360.0/ (2.0*math.Pi)))  * v.groundSpeed).asInstanceOf[Int]
+      val y:Int = math.round(math.cos(v.heading / (360.0/ (2.0*math.Pi)))  * v.groundSpeed).asInstanceOf[Int]
+      v.id ~ (((((v.intentChange ~ v.nac) ~ x) ~ y) ~ v.verticalRate) ~v.deltaFromBaro)
+    }
   )
 
   def call: Codec[String] = {
