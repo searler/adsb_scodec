@@ -250,10 +250,10 @@ object Datum {
   }
 
   sealed trait AirSpeed {
-    def knots:Double
+    def knots:Int
   }
-  case class IndicatedAirSpeed(knots:Double) extends AirSpeed
-  case class TrueAirSpeed(knots:Double) extends AirSpeed
+  case class IndicatedAirSpeed(knots:Int) extends AirSpeed
+  case class TrueAirSpeed(knots:Int) extends AirSpeed
 
   sealed trait VerticalRate{
     def rate:Int

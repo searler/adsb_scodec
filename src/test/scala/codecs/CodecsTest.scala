@@ -30,6 +30,15 @@ class CodecsTest {
   }
 
   @Test
+  def airSpeed = {
+    val msg = SubsonicAirSpeedMessage(Timestamp(0), AircraftAddress("A05F21"),false,VelocityNAC0,
+      Some(243.984375), TrueAirSpeed(376), GeometricVerticalRate(-37), 0)
+    assertEquals(msg,decoder(hex"8DA05F219B06B6AF189400CBC33F"))
+
+    round(msg)
+  }
+
+  @Test
   def callsign {
     assertEquals("c01c42820820", CodecTest.encode(codecs.call)("0A1B"))
     CodecTest.round(codecs.call)("0A")

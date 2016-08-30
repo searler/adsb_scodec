@@ -174,6 +174,7 @@ class Codecs(tsSource: () => Timestamp) {
 
   val nacv :Codec[VelocityNAC] = mappedEnum(uint3,
     VelocityNAC0 -> 0 , VelocityNAC1 -> 1, VelocityNAC2 -> 2, VelocityNAC3 ->3, VelocityNAC4 ->4)
+
   val verticalRate:Codec[VerticalRate] = (bool(1) ~ bool(1) ~int(9)).xmap (
      _ match {
        case (true ~ d) ~ r => GeometricVerticalRate(if(d) -r else r)
@@ -194,7 +195,8 @@ class Codecs(tsSource: () => Timestamp) {
     v  => if(v > 0) false ~( v + 1) else true ~ ((-v) + 1)
   )
 
-  val subsonicGroundSpeed : Codec[SubsonicGroundVelocityMessage] = (addr ~ ((c5(19) ~> c3(1)) ~> bool(1) ~ (ignore(1) ~> nacv) ~ gvel ~ gvel ~ verticalRate ~ (ignore(2) ~> int(8)) )).xmap (
+  val subsonicGroundSpeed : Codec[SubsonicGroundVelocityMessage] = (addr ~ ((c5(19) ~> c3(1)) ~> bool(1) ~
+          (ignore(1) ~> nacv) ~ gvel ~ gvel ~ verticalRate ~ (ignore(2) ~> int(8)) )).xmap (
     p => {
       val  (addr ~ (((((icf ~ nac) ~ x) ~ y) ~ vr) ~bd)) = p
 
@@ -210,6 +212,40 @@ class Codecs(tsSource: () => Timestamp) {
       v.id ~ (((((v.intentChange ~ v.nac) ~ x) ~ y) ~ v.verticalRate) ~v.deltaFromBaro)
     }
   )
+
+  val heading: Codec[Option[Double]] = (bool(1) ~ uint(10)).xmap (
+    _ match {
+      case false ~ _ => None
+      case true ~ p  => Some((p /1024.0)*360.0)
+    },
+  _ match {
+      case None => false ~ 0
+      case Some(p) => true ~  (math.round((p *  1024)/360.0).asInstanceOf[Int])
+    }
+  )
+  val airspeed:Codec[AirSpeed] = (bool(1) ~ uint(10)).xmap(
+    _ match {
+      case true ~ p => TrueAirSpeed(p)
+      case false ~ p => IndicatedAirSpeed(p)
+    },
+    _ match {
+      case TrueAirSpeed(v) => true ~ v
+      case IndicatedAirSpeed(v) => false ~ v
+     }
+  )
+
+
+  val subsonicAirSpeed :Codec[SubsonicAirSpeedMessage] = (addr ~ ((c5(19) ~> c3(3)) ~> bool(1) ~
+    (ignore(1) ~> nacv) ~ heading ~ airspeed  ~ verticalRate ~ (ignore(2) ~> int(8)))).xmap(
+    p=> {
+      val (addr ~ (((((icf ~ nac) ~ h) ~ v) ~ vr) ~bd)) = p
+      SubsonicAirSpeedMessage(tsSource(),addr,icf,nac,
+        h, v,
+        vr, bd )
+    },
+    v => v.id ~ (((((v.intentChange ~ v.nac) ~ v.heading) ~ v.airspeed) ~ v.verticalRate) ~v.deltaFromBaro)
+  )
+
 
   def call: Codec[String] = {
     val ais_charset = "?ABCDEFGHIJKLMNOPQRSTUVWXYZ????? ???????????????0123456789??????".toVector
@@ -235,6 +271,7 @@ class Codecs(tsSource: () => Timestamp) {
   val msg = choice(adsbDF ~> capabilities ~> choice(barometricAirbornePosition.upcast[Message],
     gnssAirbornePosition.upcast[Message],
     subsonicGroundSpeed.upcast[Message],
+    subsonicAirSpeed.upcast[Message],
     surfacePosition.upcast[Message],
     airborneOperationalStatus.upcast[Message],
     surfaceOperationalStatus.upcast[Message],
